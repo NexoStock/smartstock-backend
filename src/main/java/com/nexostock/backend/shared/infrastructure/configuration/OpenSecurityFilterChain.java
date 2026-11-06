@@ -1,6 +1,7 @@
 
 package com.nexostock.backend.shared.infrastructure.configuration;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -11,10 +12,6 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-/**
- * Temporary security configuration for local development only.
- * Lore will replace it when JWT authentication is integrated.
- */
 @Configuration
 @Profile("local")
 @EnableWebSecurity
@@ -23,6 +20,7 @@ public class OpenSecurityFilterChain {
     @Bean
     public SecurityFilterChain openFilterChain(
             HttpSecurity http,
+            @Qualifier("corsConfigurationSource")
             CorsConfigurationSource cors) throws Exception {
 
         http.csrf(AbstractHttpConfigurer::disable)
