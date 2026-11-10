@@ -46,12 +46,40 @@ public class JwtTokenService implements TokenService {
     @Override
     public Optional<AuthenticatedAccount> validate(String token) {
         try {
-            Claims claims = Jwts.parser().verifyWith(key).build().parseSignedClaims(token).getPayload();
+            Claims claims = Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token)
+                    .getPayload();
+
+            String subject = claims.getSubject();
+            Long businessId = claims.get("businessId", Long.class);
+            String email = claims.get("email", String.class);
+
+            if (subject == null
+                    || subject.isBlank()
+                    || businessId == null
+                    || businessId <= 0
+                    || email == null
+                    || email.isBlank()
+                    || claims.getExpiration() == null) {
+                return Optional.empty();
+            }
+
+            Long accountId = Long.valueOf(subject);
+
+            if (accountId <= 0) {
+                return Optional.empty();
+            }
+
             return Optional.of(
                     new AuthenticatedAccount(
-                            Long.valueOf(claims.getSubject()),
-                            claims.get("businessId", Long.class),
-                            claims.get("email", String.class)));
+                            accountId,
+                            businessId,
+                            email
+                    )
+            );
+
         } catch (JwtException | IllegalArgumentException e) {
             return Optional.empty();
         }
