@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.interfaces.acl;
+package com.nexostock.backend.inventory.interfaces.acl;
 
 import com.nexostock.backend.inventory.application.commandservices.MovementCommandService;
 import com.nexostock.backend.inventory.domain.model.aggregates.MovementType;

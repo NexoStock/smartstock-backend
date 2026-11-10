@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.application.internal.eventhandlers;
+package com.nexostock.backend.inventory.application.internal.eventhandlers;
 
 import com.nexostock.backend.catalog.domain.model.events.ProductCreatedEvent;
 import com.nexostock.backend.inventory.application.commandservices.MovementCommandService;

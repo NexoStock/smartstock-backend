@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.domain.model.commands;
+package com.nexostock.backend.inventory.domain.model.commands;
 
 import com.nexostock.backend.inventory.domain.model.aggregates.MovementType;
 import java.util.Objects;

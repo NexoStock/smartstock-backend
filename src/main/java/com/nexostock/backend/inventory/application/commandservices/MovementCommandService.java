@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.application.commandservices;
+package com.nexostock.backend.inventory.application.commandservices;
 
 import com.nexostock.backend.inventory.domain.model.aggregates.Movement;
 import com.nexostock.backend.inventory.domain.model.commands.AdjustStockCommand;

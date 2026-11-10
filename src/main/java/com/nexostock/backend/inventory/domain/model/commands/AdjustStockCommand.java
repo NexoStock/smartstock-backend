@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.domain.model.commands;
+package com.nexostock.backend.inventory.domain.model.commands;
 
 import java.util.Objects;
 
