@@ -69,14 +69,23 @@ public class Product extends AuditableAbstractPersistenceEntity {
         this.registeredStock = 0;
         this.minimumThreshold = command.minimumThreshold();
         this.maximumCapacity = command.maximumCapacity();
+
         assertThresholdWithinCapacity();
     }
 
     public void update(UpdateProductCommand command) {
+        // Validar antes de modificar cualquier campo.
         assertThresholdWithinCapacity(
                 command.minimumThreshold(),
                 command.maximumCapacity()
         );
+
+        // No permitir una capacidad inferior al stock existente.
+        if (registeredStock > command.maximumCapacity()) {
+            throw new IllegalStateException(
+                    "MAXIMUM_CAPACITY_BELOW_CURRENT_STOCK"
+            );
+        }
 
         this.name = command.name();
 
@@ -94,26 +103,48 @@ public class Product extends AuditableAbstractPersistenceEntity {
     }
 
     public void changeThreshold(int newThreshold) {
-        assertThresholdWithinCapacity(newThreshold, maximumCapacity);
+        assertThresholdWithinCapacity(
+                newThreshold,
+                maximumCapacity
+        );
+
         this.minimumThreshold = newThreshold;
     }
 
     public void applyStock(int newStock) {
+        // El stock no puede ser negativo.
         if (newStock < 0) {
-            throw new IllegalStateException("INSUFFICIENT_STOCK");
+            throw new IllegalStateException(
+                    "INSUFFICIENT_STOCK"
+            );
         }
+
+        // El stock no puede superar la capacidad maxima.
+        if (newStock > maximumCapacity) {
+            throw new IllegalStateException(
+                    "MAXIMUM_CAPACITY_EXCEEDED"
+            );
+        }
+
+        // Actualizar solamente si todas las validaciones pasan.
         this.registeredStock = newStock;
     }
 
     public void retire() {
         if (registeredStock != 0) {
-            throw new IllegalStateException("PRODUCT_HAS_STOCK");
+            throw new IllegalStateException(
+                    "PRODUCT_HAS_STOCK"
+            );
         }
+
         this.active = false;
     }
 
     private void assertThresholdWithinCapacity() {
-        assertThresholdWithinCapacity(minimumThreshold, maximumCapacity);
+        assertThresholdWithinCapacity(
+                minimumThreshold,
+                maximumCapacity
+        );
     }
 
     private static void assertThresholdWithinCapacity(
