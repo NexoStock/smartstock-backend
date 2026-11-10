@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.interfaces.rest;
+package com.nexostock.backend.inventory.interfaces.rest;
 
 import com.nexostock.backend.inventory.application.commandservices.MovementCommandService;
 import com.nexostock.backend.inventory.domain.model.commands.AdjustStockCommand;

@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.application.internal.commandservices;
+package com.nexostock.backend.inventory.application.internal.commandservices;
 
 import com.nexostock.backend.catalog.interfaces.acl.CatalogContextFacade;
 import com.nexostock.backend.catalog.interfaces.acl.ProductSnapshot;

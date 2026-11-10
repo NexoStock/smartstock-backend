@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.infrastructure.persistence.jpa;
+package com.nexostock.backend.inventory.infrastructure.persistence.jpa;
 
 import com.nexostock.backend.inventory.domain.model.aggregates.Movement;
 import java.time.Instant;

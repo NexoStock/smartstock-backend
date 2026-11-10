@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.domain.model.aggregates;
+package com.nexostock.backend.inventory.domain.model.aggregates;
 
 import com.nexostock.backend.shared.infrastructure.persistence.jpa.entities.AuditableAbstractPersistenceEntity;
 import jakarta.persistence.Column;

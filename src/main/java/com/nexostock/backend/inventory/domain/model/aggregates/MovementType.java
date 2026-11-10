@@ -1,4 +1,4 @@
-﻿package com.nexostock.backend.inventory.domain.model.aggregates;
+package com.nexostock.backend.inventory.domain.model.aggregates;
 
 public enum MovementType {
   SALE,
