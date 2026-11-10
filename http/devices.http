@@ -1,0 +1,96 @@
+### Devices (IoT) - NexoStock backend
+### Run from IntelliJ (HTTP Client). Change @host for the deployed API.
+@host = http://localhost:8080
+
+### 1. Register a sensor -> 201. Copy "claveDispositivo": it is shown only once
+POST {{host}}/api/sensores
+Content-Type: application/json
+
+{
+  "codigo": "SN-0001"
+}
+
+### 2. Paste here the key returned by step 1
+@deviceKey = paste-the-key-here
+
+### 3. List sensors -> 200 (estado: available until it is linked)
+GET {{host}}/api/sensores
+
+### 4. Link sensor 1 to product 1 -> 200
+POST {{host}}/api/sensores/vincular
+Content-Type: application/json
+
+{
+  "sensorId": 1,
+  "productoId": 1
+}
+
+### 5. Device sends a reading -> 201 (estado: online)
+POST {{host}}/api/device-readings/SN-0001
+Content-Type: application/json
+X-Device-Key: {{deviceKey}}
+
+{
+  "pesoKg": 12.5
+}
+
+### 6. Same reading with an explicit date -> 201; send it twice -> 409 DUPLICATE_READING
+POST {{host}}/api/device-readings/SN-0001
+Content-Type: application/json
+X-Device-Key: {{deviceKey}}
+
+{
+  "pesoKg": 12.0,
+  "medidoEn": "2026-11-08T15:00:00Z"
+}
+
+### 7. Older reading than the last one -> 409 OUT_OF_ORDER_READING
+POST {{host}}/api/device-readings/SN-0001
+Content-Type: application/json
+X-Device-Key: {{deviceKey}}
+
+{
+  "pesoKg": 11.0,
+  "medidoEn": "2026-11-08T10:00:00Z"
+}
+
+### 8. Without X-Device-Key -> 401
+POST {{host}}/api/device-readings/SN-0001
+Content-Type: application/json
+
+{
+  "pesoKg": 12.5
+}
+
+### 9. With the key of another device -> 401
+POST {{host}}/api/device-readings/SN-0001
+Content-Type: application/json
+X-Device-Key: 0000000000000000000000000000000000000000000000000000000000000000
+
+{
+  "pesoKg": 12.5
+}
+
+### 10. Negative weight -> 400
+POST {{host}}/api/device-readings/SN-0001
+Content-Type: application/json
+X-Device-Key: {{deviceKey}}
+
+{
+  "pesoKg": -3
+}
+
+### 11. Sensor detail with product name, weight and units -> 200
+GET {{host}}/api/sensores/1
+
+### 12. Latest readings -> 200
+GET {{host}}/api/sensores/1/lecturas
+
+### 13. Rotate the key -> 200 (the old key now returns 401)
+POST {{host}}/api/sensores/1/rotar-clave
+
+### 14. Unlink -> 200 (estado: available)
+POST {{host}}/api/sensores/1/desvincular
+
+### 15. Delete -> 204
+DELETE {{host}}/api/sensores/1

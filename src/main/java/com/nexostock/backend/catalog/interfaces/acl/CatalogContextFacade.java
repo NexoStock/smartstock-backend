@@ -69,6 +69,23 @@ public class CatalogContextFacade {
                 });
     }
 
+    /**
+     * Unit weight in kilograms, used by Devices to turn
+     * a weight reading into units.
+     */
+    @Transactional(readOnly = true)
+    public Optional<BigDecimal> findUnitWeightKg(
+            Long businessId,
+            Long productId) {
+
+        return products
+                .findByIdAndBusinessIdAndActiveTrue(
+                        productId,
+                        businessId
+                )
+                .map(Product::getUnitWeightKg);
+    }
+
     private ProductSnapshot toSnapshot(Product p) {
 
         return new ProductSnapshot(

@@ -56,6 +56,10 @@ public class JwtSecurityConfiguration {
                                 "/actuator/health",
                                 "/actuator/health/**"
                         ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/api/device-readings/*"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(
