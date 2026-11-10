@@ -1,0 +1,8 @@
+package com.nexostock.backend.iam.infrastructure.persistence.jpa;
+
+import com.nexostock.backend.iam.domain.model.aggregates.Business;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface BusinessRepository extends JpaRepository<Business, Long> {}
