@@ -5,9 +5,10 @@ import com.nexostock.backend.iam.domain.model.commands.RegisterBusinessCommand;
 import com.nexostock.backend.iam.domain.model.commands.SignInCommand;
 import com.nexostock.backend.shared.application.result.ApplicationError;
 import com.nexostock.backend.shared.application.result.Result;
+import com.nexostock.backend.iam.domain.model.commands.RequestPasswordResetCommand;
+import com.nexostock.backend.iam.domain.model.commands.ResetPasswordCommand;
 
-/** 2 commands defined = 2 handled. */
-public interface AccountCommandService {
+/** 4 commands defined = 4 handled. */public interface AccountCommandService {
 
     /** Account + business name + generated token. */
     record SignedIn(Account account, String businessName, String businessType, String token) {}
@@ -15,4 +16,8 @@ public interface AccountCommandService {
     Result<SignedIn, ApplicationError> handle(RegisterBusinessCommand command);
 
     Result<SignedIn, ApplicationError> handle(SignInCommand command);
+
+    Result<Boolean, ApplicationError> handle(RequestPasswordResetCommand command);
+
+    Result<Boolean, ApplicationError> handle(ResetPasswordCommand command);
 }
