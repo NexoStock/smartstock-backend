@@ -5,8 +5,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Component;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 
 @Component
+@ConditionalOnProperty(
+        name = "app.notifications.enabled",
+        havingValue = "true"
+)
 public class SmtpEmailSender implements NotificationSender {
 
     private final JavaMailSender mail;
