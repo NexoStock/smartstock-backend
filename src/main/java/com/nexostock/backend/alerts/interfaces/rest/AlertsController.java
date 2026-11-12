@@ -3,6 +3,7 @@ package com.nexostock.backend.alerts.interfaces.rest;
 import com.nexostock.backend.alerts.application.queryservices.AlertQueryService;
 import com.nexostock.backend.alerts.domain.model.queries.GetAlertsQuery;
 import com.nexostock.backend.alerts.interfaces.rest.transform.AlertResourceFromEntityAssembler;
+import com.nexostock.backend.catalog.interfaces.acl.CatalogContextFacade;
 import com.nexostock.backend.shared.interfaces.rest.security.CurrentBusinessProvider;
 import com.nexostock.backend.shared.interfaces.rest.transform.ProblemDetailFromApplicationErrorAssembler;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,30 +26,39 @@ public class AlertsController {
     private final AlertQueryService queries;
     private final CurrentBusinessProvider current;
     private final ProblemDetailFromApplicationErrorAssembler problems;
+    private final CatalogContextFacade catalog;
 
     public AlertsController(
             AlertQueryService queries,
             CurrentBusinessProvider current,
-            ProblemDetailFromApplicationErrorAssembler problems) {
+            ProblemDetailFromApplicationErrorAssembler problems,
+            CatalogContextFacade catalog) {
         this.queries = queries;
         this.current = current;
         this.problems = problems;
+        this.catalog = catalog;
     }
 
     @GetMapping
-    @Operation(
-            summary = "List alerts",
-            description = "Active alerts and the latest resolved ones")
+    @Operation(summary = "List alerts of the business")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Alerts found")
+            @ApiResponse(responseCode = "200", description = "Alerts found"),
+            @ApiResponse(responseCode = "401", description = "Authentication required")
     })
     public ResponseEntity<?> getAll() {
-        return queries
-                .handle(new GetAlertsQuery(current.businessId()))
+        Long businessId = current.businessId();
+
+        return queries.handle(new GetAlertsQuery(businessId))
                 .<ResponseEntity<?>>fold(
                         list -> ResponseEntity.ok(
                                 list.stream()
-                                        .map(AlertResourceFromEntityAssembler::toResource)
+                                        .map(alert ->
+                                                AlertResourceFromEntityAssembler.toResource(
+                                                        alert,
+                                                        catalog.findProduct(
+                                                                        businessId,
+                                                                        alert.getProductId())
+                                                                .orElse(null)))
                                         .toList()),
                         problems::toResponseEntity);
     }

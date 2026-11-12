@@ -1,12 +1,15 @@
 package com.nexostock.backend.alerts.application.internal.commandservices;
 
+import com.nexostock.backend.alerts.application.internal.services.ChannelConfigurationService;
 import com.nexostock.backend.alerts.domain.model.aggregates.Alert;
 import com.nexostock.backend.alerts.domain.model.aggregates.AlertType;
+import com.nexostock.backend.alerts.domain.model.aggregates.NotificationChannel;
 import com.nexostock.backend.alerts.domain.model.aggregates.OutboundMessage;
 import com.nexostock.backend.alerts.domain.model.commands.EvaluateLowStockCommand;
 import com.nexostock.backend.alerts.infrastructure.persistence.jpa.AlertRepository;
 import com.nexostock.backend.alerts.infrastructure.persistence.jpa.OutboundMessageRepository;
-import com.nexostock.backend.iam.interfaces.acl.IamContextFacade;
+import com.nexostock.backend.shared.application.result.Result;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,15 +22,15 @@ class AlertCommandServiceImplTest {
 
     private AlertRepository alerts;
     private OutboundMessageRepository queue;
-    private IamContextFacade iam;
+    private ChannelConfigurationService channels;
     private AlertCommandServiceImpl service;
 
     @BeforeEach
     void setUp() {
         alerts = mock(AlertRepository.class);
         queue = mock(OutboundMessageRepository.class);
-        iam = mock(IamContextFacade.class);
-        service = new AlertCommandServiceImpl(alerts, queue, iam);
+        channels = mock(ChannelConfigurationService.class);
+        service = new AlertCommandServiceImpl(alerts, queue, channels);
     }
 
     private EvaluateLowStockCommand command(int stock) {
@@ -42,18 +45,40 @@ class AlertCommandServiceImplTest {
     }
 
     @Test
-    void lowStockCreatesAlertAndQueuesBothChannels() {
+    void lowStockCreatesAlertAndQueuesActiveChannels() {
         existingAlert(Optional.empty());
-        when(iam.findContact(1L)).thenReturn(Optional.of(
-                new IamContextFacade.BusinessContact(
-                        1L, "negocio@example.com", "+51999999999")));
+
+        when(channels.findOrCreate(1L)).thenReturn(Result.success(List.of(
+                new NotificationChannel(
+                        1L, "email", "negocio@example.com", true),
+                new NotificationChannel(
+                        1L, "whatsapp", "+51999999999", true))));
 
         var result = service.handle(command(3));
 
         assertTrue(result.getValue().orElseThrow());
         verify(alerts).save(any(Alert.class));
         verify(queue, times(2)).save(any(OutboundMessage.class));
-        verify(iam).findContact(1L);
+        verify(channels).findOrCreate(1L);
+    }
+
+    @Test
+    void disabledChannelDoesNotReceiveNotification() {
+        existingAlert(Optional.empty());
+
+        when(channels.findOrCreate(1L)).thenReturn(Result.success(List.of(
+                new NotificationChannel(
+                        1L, "email", "negocio@example.com", true),
+                new NotificationChannel(
+                        1L, "whatsapp", "+51999999999", false))));
+
+        service.handle(command(3));
+
+        verify(queue, times(1)).save(argThat(
+                message -> message.getChannel().equals("email")
+                        && message.getBusinessId().equals(1L)
+                        && message.getDestination()
+                        .equals("negocio@example.com")));
     }
 
     @Test
@@ -67,7 +92,7 @@ class AlertCommandServiceImplTest {
         assertEquals(2, alert.getReferenceStock());
         assertTrue(alert.isActive());
         verify(alerts).save(alert);
-        verifyNoInteractions(queue, iam);
+        verifyNoInteractions(queue, channels);
     }
 
     @Test
@@ -81,7 +106,7 @@ class AlertCommandServiceImplTest {
         assertFalse(alert.isActive());
         assertNotNull(alert.getResolvedAt());
         verify(alerts).save(alert);
-        verifyNoInteractions(queue, iam);
+        verifyNoInteractions(queue, channels);
     }
 
     @Test
@@ -92,6 +117,6 @@ class AlertCommandServiceImplTest {
 
         assertFalse(result.getValue().orElseThrow());
         verify(alerts, never()).save(any(Alert.class));
-        verifyNoInteractions(queue, iam);
+        verifyNoInteractions(queue, channels);
     }
 }
