@@ -18,14 +18,17 @@ public class TwilioWhatsAppSender implements NotificationSender {
     private final String sid;
     private final String token;
     private final String from;
+    private final String contentSid;
 
     public TwilioWhatsAppSender(
             @Value("${app.twilio.sid:}") String sid,
             @Value("${app.twilio.token:}") String token,
-            @Value("${app.twilio.from:}") String from) {
+            @Value("${app.twilio.from:}") String from,
+            @Value("${app.twilio.content-sid:}") String contentSid) {
         this.sid = sid;
         this.token = token;
         this.from = from;
+        this.contentSid = contentSid;
     }
 
     @Override
@@ -42,7 +45,12 @@ public class TwilioWhatsAppSender implements NotificationSender {
         MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
         form.add("From", whatsappAddress(from));
         form.add("To", whatsappAddress(message.getDestination()));
-        form.add("Body", message.getContent());
+
+        if (contentSid.isBlank()) {
+            form.add("Body", message.getContent());
+        } else {
+            form.add("ContentSid", contentSid);
+        }
 
         http.post()
                 .uri("/2010-04-01/Accounts/{sid}/Messages.json", sid)

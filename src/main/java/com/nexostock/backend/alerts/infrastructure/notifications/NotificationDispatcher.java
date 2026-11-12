@@ -62,7 +62,7 @@ public class NotificationDispatcher {
                 message.markFailedAttempt();
 
                 log.warn("Notification {} failed; attempts: {}",
-                        message.getId(), message.getAttempts());
+                        message.getId(), message.getAttempts(), exception);
             }
 
             queue.save(message);
