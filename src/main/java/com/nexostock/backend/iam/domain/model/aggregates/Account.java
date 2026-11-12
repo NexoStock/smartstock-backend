@@ -32,4 +32,7 @@ public class Account extends AuditableAbstractPersistenceEntity {
     public Long getBusinessId() { return businessId; }
     public EmailAddress getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
+    public void changePasswordHash(String newPasswordHash) {
+        this.passwordHash = newPasswordHash;
+    }
 }

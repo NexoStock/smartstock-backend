@@ -22,6 +22,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.nexostock.backend.iam.domain.model.commands.RequestPasswordResetCommand;
+import com.nexostock.backend.iam.domain.model.commands.ResetPasswordCommand;
 
 @RestController
 @RequestMapping(value = "/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
@@ -40,6 +42,14 @@ public class AuthenticationController {
             @NotBlank @Schema(example = "Clave-Segura-123") String password) {}
 
     public record SessionResource(String token, String email, String businessName, String businessType) {}
+    public record ForgotPasswordResource(
+            @NotBlank @Email @Schema(example = "pepe@bodega.pe") String email) {}
+
+    public record ResetPasswordResource(
+            @NotBlank @Schema(example = "token-recibido-por-correo") String token,
+            @NotBlank @Size(min = 8, max = 72) @Schema(example = "Nueva-Clave-123") String newPassword) {}
+
+    public record MessageResource(String message) {}
 
     private final AccountCommandService commands;
     private final ProblemDetailFromApplicationErrorAssembler problems;
@@ -81,6 +91,37 @@ public class AuthenticationController {
                 .<ResponseEntity<?>>fold(s -> ResponseEntity.ok(toResource(s)), problems::toResponseEntity);
     }
 
+    @PostMapping(value = "/forgot-password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Request a password reset",
+            description = "Always answers 200, whether the email exists or not")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Request accepted"),
+            @ApiResponse(responseCode = "400", description = "Invalid data")
+    })
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordResource body) {
+        var command = new RequestPasswordResetCommand(new EmailAddress(body.email()));
+        return commands
+                .handle(command)
+                .<ResponseEntity<?>>fold(
+                        ok -> ResponseEntity.ok(
+                                new MessageResource("If the email is registered, a reset link was sent")),
+                        problems::toResponseEntity);
+    }
+
+    @PostMapping(value = "/reset-password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @Operation(summary = "Reset the password", description = "Uses a one-time token valid for 1 hour")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Password updated"),
+            @ApiResponse(responseCode = "400", description = "Invalid data, or invalid or expired token")
+    })
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordResource body) {
+        var command = new ResetPasswordCommand(body.token(), body.newPassword());
+        return commands
+                .handle(command)
+                .<ResponseEntity<?>>fold(
+                        ok -> ResponseEntity.ok(new MessageResource("Password updated")),
+                        problems::toResponseEntity);
+    }
     private SessionResource toResource(SignedIn s) {
         return new SessionResource(s.token(), s.account().getEmail().value(), s.businessName(), s.businessType());
     }
