@@ -17,7 +17,7 @@ FROM eclipse-temurin:27-jre
 WORKDIR /app
 
 RUN useradd -r -u 10001 nexostock
-COPY --from=build /app/target/nexostock-backend-1.0.0.jar app.jar
+COPY --from=build /app/target/nexostock-backend-*.jar app.jar
 USER nexostock
 
 # prod profile: no default secrets; the application stops
