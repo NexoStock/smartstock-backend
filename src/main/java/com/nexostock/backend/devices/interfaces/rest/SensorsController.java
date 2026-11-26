@@ -1,3 +1,4 @@
+
 package com.nexostock.backend.devices.interfaces.rest;
 
 import com.nexostock.backend.devices.application.commandservices.SensorCommandService;
@@ -119,7 +120,34 @@ public class SensorsController {
     }
 
     // ========================================
-    // GET - ÚLTIMAS LECTURAS
+    // GET - ESTADO DE CONEXION DEL SENSOR
+    // TS05
+    // ========================================
+
+    @GetMapping("/{id}/estado")
+    @Operation(
+            summary = "Get sensor connection status",
+            description = "Returns the sensor status based on its latest reading within the last 5 minutes (rule R11)"
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Sensor status found"),
+            @ApiResponse(responseCode = "404", description = "Sensor not found")
+    })
+    public ResponseEntity<?> getStatus(@PathVariable Long id) {
+
+        Instant now = Instant.now();
+
+        return queries
+                .handle(new GetSensorByIdQuery(current.businessId(), id))
+                .<ResponseEntity<?>>fold(
+                        s -> ResponseEntity.ok(
+                                sensorAssembler.toResource(s, now)),
+                        problems::toResponseEntity
+                );
+    }
+
+    // ========================================
+    // GET - ULTIMAS LECTURAS
     // ========================================
 
     @GetMapping("/{id}/lecturas")
