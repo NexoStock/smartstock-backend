@@ -22,7 +22,10 @@ public record PurchaseResource(
         List<PurchaseItemResource> items,
 
         @JsonProperty("total")
-        BigDecimal total
+        BigDecimal total,
+
+        @JsonProperty("fecha")
+        String fecha
 
 ) {
 }

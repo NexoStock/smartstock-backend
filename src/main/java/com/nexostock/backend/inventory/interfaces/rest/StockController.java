@@ -47,7 +47,9 @@ public class StockController {
             Long id,
             int quantity,
             int stockAfter,
-            String type) {}
+            String type,
+            String reference,
+            java.time.Instant createdAt) {}
 
     private final MovementCommandService commands;
     private final MovementQueryService queries;
@@ -92,7 +94,7 @@ public class StockController {
                                                 m.getId(),
                                                 m.getQuantity(),
                                                 m.getStockAfter(),
-                                                m.getType().name()
+                                                m.getType().name(), m.getReference(), m.getCreatedAt()
                                         ))
                                         .toList()
                         ),
@@ -133,7 +135,7 @@ public class StockController {
                                         m.getId(),
                                         m.getQuantity(),
                                         m.getStockAfter(),
-                                        m.getType().name()
+                                        m.getType().name(), m.getReference(), m.getCreatedAt()
                                 )
                         ),
                         problems::toResponseEntity

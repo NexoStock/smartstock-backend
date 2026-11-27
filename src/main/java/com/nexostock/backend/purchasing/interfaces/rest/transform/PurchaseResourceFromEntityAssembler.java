@@ -40,7 +40,8 @@ public final class PurchaseResourceFromEntityAssembler {
                 purchase.getSupplierId(),
                 purchase.getStatus().name(),
                 items,
-                purchase.calculateTotal()
+                purchase.calculateTotal(),
+                purchase.getCreatedAt() == null ? null : purchase.getCreatedAt().toString()
         );
     }
 }
