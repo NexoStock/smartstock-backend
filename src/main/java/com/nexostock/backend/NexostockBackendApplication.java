@@ -2,6 +2,7 @@ package com.nexostock.backend;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.security.autoconfigure.UserDetailsServiceAutoConfiguration;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
@@ -9,7 +10,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * Entry point of the NexoStock backend.
  * Entrada principal del backend.
  */
-@SpringBootApplication
+@SpringBootApplication(
+        exclude = UserDetailsServiceAutoConfiguration.class
+)
 @EnableJpaAuditing
 @EnableScheduling
 public class NexostockBackendApplication {
